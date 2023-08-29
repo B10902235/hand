@@ -13,8 +13,8 @@ def num2alphabet(text):    # 將預測結果轉為英文字母
 
 
 
-
-def predict(img):
+                # 正解
+def predict(img, correct):
     detector = HandDetector(detectionCon=0.5, maxHands=1)  # cvzone,用於抓出手部位置
 
     model = load_model('signDot.h5')  # 關節點手勢辨識模型
@@ -57,7 +57,19 @@ def predict(img):
                 prediction = model.predict(finger_points, verbose=0)  # 輸出的是編碼
                 index = np.argmax(prediction)  # 將編碼轉換後才是結果
                 text = num2alphabet(index)
-                return round(prediction.max(), 3), text
+                # return round(prediction.max(), 3), text
+                ans = {}
+                alphabet = 'ABCDEFGHIKLMNOPQRSTUVWXY'
+                count = 0
+                for a in alphabet:
+                    ans[a] = prediction[0][count]
+                    count = count + 1
+                payload = {
+                    'result': text,
+                    'result_score': ans[text],
+                    'correct_score': ans[correct]
+                }
+                return payload
             else:
                 print('mediapipe沒偵測到')
         else:
@@ -65,3 +77,5 @@ def predict(img):
     else:
         print('no hands')
 
+img = cv2.imread('D:/git-reps/hand/aaa.jpg')
+print(predict(img, 'S'))
